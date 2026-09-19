@@ -1,0 +1,66 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: gateway
+      POSTGRES_PASSWORD: gateway
+      POSTGRES_DB: gateway
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  upstream-a:
+    build: ./mock_upstream
+    environment:
+      UPSTREAM_NAME: upstream-a
+    ports:
+      - "9001:8000"
+
+  upstream-b:
+    build: ./mock_upstream
+    environment:
+      UPSTREAM_NAME: upstream-b
+    ports:
+      - "9002:8000"
+
+  upstream-c:
+    build: ./mock_upstream
+    environment:
+      UPSTREAM_NAME: upstream-c
+    ports:
+      - "9003:8000"
+
+  gateway:
+    build: ./gateway
+    environment:
+      GATEWAY_REDIS_URL: redis://redis:6379/0
+      GATEWAY_POSTGRES_DSN: postgresql://gateway:gateway@postgres:5432/gateway
+      # Phase 4: free Groq-hosted (gpt-oss-120b) calls for AI-assisted failure analysis.
+      # Pulled from the host shell's environment -- never hardcode a key here.
+      GROQ_API_KEY: ${GROQ_API_KEY}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - postgres
+      - upstream-a
+      - upstream-b
+      - upstream-c
+
+  dashboard:
+    build: ./dashboard
+    environment:
+      NEXT_PUBLIC_GATEWAY_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - gateway
+
+volumes:
+  pgdata:

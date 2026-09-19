@@ -1,0 +1,137 @@
+[
+  {
+    "scenario": "total_outage",
+    "naive": {
+      "total": 25,
+      "successes": 0,
+      "failures": 25,
+      "availability_pct": 0.0,
+      "error_rate_pct": 100.0,
+      "avg_latency_ms": 23.2,
+      "p50_latency_ms": 22.7,
+      "p95_latency_ms": 25.0,
+      "p99_latency_ms": 26.4,
+      "avg_retry_count": null
+    },
+    "smart": {
+      "total": 25,
+      "successes": 0,
+      "failures": 25,
+      "availability_pct": 0.0,
+      "error_rate_pct": 100.0,
+      "avg_latency_ms": 72.0,
+      "p50_latency_ms": 3.1,
+      "p95_latency_ms": 373.9,
+      "p99_latency_ms": 435.6,
+      "avg_retry_count": 3.0
+    }
+  },
+  {
+    "scenario": "intermittent_failure",
+    "naive": {
+      "total": 40,
+      "successes": 23,
+      "failures": 17,
+      "availability_pct": 57.5,
+      "error_rate_pct": 42.5,
+      "avg_latency_ms": 23.9,
+      "p50_latency_ms": 23.8,
+      "p95_latency_ms": 26.2,
+      "p99_latency_ms": 28.4,
+      "avg_retry_count": null
+    },
+    "smart": {
+      "total": 40,
+      "successes": 37,
+      "failures": 3,
+      "availability_pct": 92.5,
+      "error_rate_pct": 7.5,
+      "avg_latency_ms": 148.5,
+      "p50_latency_ms": 96.0,
+      "p95_latency_ms": 459.8,
+      "p99_latency_ms": 540.4,
+      "avg_retry_count": 1.73
+    }
+  },
+  {
+    "scenario": "rate_limit_storm",
+    "naive": {
+      "total": 25,
+      "successes": 0,
+      "failures": 25,
+      "availability_pct": 0.0,
+      "error_rate_pct": 100.0,
+      "avg_latency_ms": 24.4,
+      "p50_latency_ms": 24.4,
+      "p95_latency_ms": 25.1,
+      "p99_latency_ms": 26.3,
+      "avg_retry_count": null
+    },
+    "smart": {
+      "total": 25,
+      "successes": 0,
+      "failures": 25,
+      "availability_pct": 0.0,
+      "error_rate_pct": 100.0,
+      "avg_latency_ms": 80.3,
+      "p50_latency_ms": 4.1,
+      "p95_latency_ms": 434.8,
+      "p99_latency_ms": 486.2,
+      "avg_retry_count": 3.0
+    }
+  },
+  {
+    "scenario": "gradual_degradation",
+    "naive": {
+      "total": 12,
+      "successes": 4,
+      "failures": 8,
+      "availability_pct": 33.3,
+      "error_rate_pct": 66.7,
+      "avg_latency_ms": 3747.7,
+      "p50_latency_ms": 5007.6,
+      "p95_latency_ms": 5014.6,
+      "p99_latency_ms": 5016.6,
+      "avg_retry_count": null
+    },
+    "smart": {
+      "total": 12,
+      "successes": 4,
+      "failures": 8,
+      "availability_pct": 33.3,
+      "error_rate_pct": 66.7,
+      "avg_latency_ms": 6955.3,
+      "p50_latency_ms": 2259.4,
+      "p95_latency_ms": 15847.1,
+      "p99_latency_ms": 16094.1,
+      "avg_retry_count": 2.11
+    }
+  },
+  {
+    "scenario": "outage_with_failover",
+    "naive": {
+      "total": 20,
+      "successes": 0,
+      "failures": 20,
+      "availability_pct": 0.0,
+      "error_rate_pct": 100.0,
+      "avg_latency_ms": 23.5,
+      "p50_latency_ms": 23.0,
+      "p95_latency_ms": 26.7,
+      "p99_latency_ms": 26.9,
+      "avg_retry_count": null
+    },
+    "smart": {
+      "total": 20,
+      "successes": 15,
+      "failures": 5,
+      "availability_pct": 75.0,
+      "error_rate_pct": 25.0,
+      "avg_latency_ms": 135.2,
+      "p50_latency_ms": 34.5,
+      "p95_latency_ms": 524.1,
+      "p99_latency_ms": 620.7,
+      "avg_retry_count": 1.5
+    }
+  }
+]
