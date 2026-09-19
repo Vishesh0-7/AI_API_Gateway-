@@ -10,6 +10,13 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# docker-compose defaults -- upstreams resolve via service DNS names there.
+_DEFAULT_UPSTREAM_URLS: dict[str, str] = {
+    "upstream-a": "http://upstream-a:8000",
+    "upstream-b": "http://upstream-b:8000",
+    "upstream-c": "http://upstream-c:8000",
+}
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="GATEWAY_")
@@ -17,13 +24,25 @@ class Settings(BaseSettings):
     redis_url: str = "redis://redis:6379/0"
     postgres_dsn: str = "postgresql://gateway:gateway@postgres:5432/gateway"
 
-    # Upstream registry: logical name -> base URL. In docker-compose these
-    # resolve via service DNS names.
-    upstreams: dict[str, str] = {
-        "upstream-a": "http://upstream-a:8000",
-        "upstream-b": "http://upstream-b:8000",
-        "upstream-c": "http://upstream-c:8000",
-    }
+    # Per-upstream hostname overrides (no scheme) -- set these in
+    # deployments where each upstream is a separate public host (e.g. the
+    # Render blueprint wires these from each upstream service's assigned
+    # hostname). Unset ones fall back to the docker-compose default below.
+    upstream_a_host: str | None = None
+    upstream_b_host: str | None = None
+    upstream_c_host: str | None = None
+
+    @property
+    def upstreams(self) -> dict[str, str]:
+        overrides = {
+            "upstream-a": self.upstream_a_host,
+            "upstream-b": self.upstream_b_host,
+            "upstream-c": self.upstream_c_host,
+        }
+        return {
+            name: f"https://{host}" if host else _DEFAULT_UPSTREAM_URLS[name]
+            for name, host in overrides.items()
+        }
 
     # Circuit breaker defaults (overridable per-upstream via the API later).
     cb_failure_threshold: int = 5

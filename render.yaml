@@ -1,0 +1,95 @@
+# Render Blueprint -- creates all 5 services in one shot via "New +" ->
+# "Blueprint" on Render, pointed at this repo.
+#
+# Postgres and Redis are deliberately NOT provisioned here as Render
+# resources: Render's free Postgres expires after 30 days, and Redis isn't
+# offered on Render's free tier. Use free, non-expiring external services
+# instead -- Neon (https://neon.tech) for Postgres, Upstash
+# (https://upstash.com) for Redis -- and paste their connection strings
+# into the `sync: false` env vars below when Render prompts for them.
+#
+# Deploy order doesn't matter here: the upstream/gateway/dashboard hostname
+# wiring below uses `fromService`, which Render resolves automatically
+# regardless of creation order, including on the very first apply.
+
+services:
+  - type: web
+    name: upstream-a
+    runtime: docker
+    plan: free
+    rootDir: mock_upstream
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: UPSTREAM_NAME
+        value: upstream-a
+
+  - type: web
+    name: upstream-b
+    runtime: docker
+    plan: free
+    rootDir: mock_upstream
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: UPSTREAM_NAME
+        value: upstream-b
+
+  - type: web
+    name: upstream-c
+    runtime: docker
+    plan: free
+    rootDir: mock_upstream
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: UPSTREAM_NAME
+        value: upstream-c
+
+  - type: web
+    name: gateway
+    runtime: docker
+    plan: free
+    rootDir: gateway
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: GATEWAY_UPSTREAM_A_HOST
+        fromService:
+          type: web
+          name: upstream-a
+          property: host
+      - key: GATEWAY_UPSTREAM_B_HOST
+        fromService:
+          type: web
+          name: upstream-b
+          property: host
+      - key: GATEWAY_UPSTREAM_C_HOST
+        fromService:
+          type: web
+          name: upstream-c
+          property: host
+      # Fill these in Render's dashboard after the first apply -- never
+      # committed to the repo. Neon connection string, e.g.:
+      #   postgresql://user:pass@ep-xxx.neon.tech/dbname?sslmode=require
+      - key: GATEWAY_POSTGRES_DSN
+        sync: false
+      # Upstash connection string, e.g.: rediss://default:pass@xxx.upstash.io:6379
+      - key: GATEWAY_REDIS_URL
+        sync: false
+      # Free key from https://console.groq.com/keys
+      - key: GROQ_API_KEY
+        sync: false
+
+  - type: web
+    name: dashboard
+    runtime: docker
+    plan: free
+    rootDir: dashboard
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NEXT_PUBLIC_GATEWAY_HOST
+        fromService:
+          type: web
+          name: gateway
+          property: host

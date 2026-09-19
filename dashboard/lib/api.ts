@@ -1,5 +1,13 @@
+// NEXT_PUBLIC_GATEWAY_URL takes a full URL (used by docker-compose, where
+// it's http://localhost:8080). NEXT_PUBLIC_GATEWAY_HOST takes a bare
+// hostname and gets an https:// scheme applied -- used by the Render
+// blueprint, which wires this from the gateway service's assigned
+// hostname via fromService (no full URL is known ahead of deploy).
 export const GATEWAY_URL =
-  process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8080";
+  process.env.NEXT_PUBLIC_GATEWAY_URL ||
+  (process.env.NEXT_PUBLIC_GATEWAY_HOST
+    ? `https://${process.env.NEXT_PUBLIC_GATEWAY_HOST}`
+    : "http://localhost:8080");
 
 export type CircuitState = "closed" | "open" | "half_open";
 
