@@ -17,8 +17,8 @@ services:
     name: upstream-a
     runtime: docker
     plan: free
-    rootDir: mock_upstream
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./mock_upstream/Dockerfile
+    dockerContext: ./mock_upstream
     healthCheckPath: /health
     envVars:
       - key: UPSTREAM_NAME
@@ -28,8 +28,8 @@ services:
     name: upstream-b
     runtime: docker
     plan: free
-    rootDir: mock_upstream
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./mock_upstream/Dockerfile
+    dockerContext: ./mock_upstream
     healthCheckPath: /health
     envVars:
       - key: UPSTREAM_NAME
@@ -39,8 +39,8 @@ services:
     name: upstream-c
     runtime: docker
     plan: free
-    rootDir: mock_upstream
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./mock_upstream/Dockerfile
+    dockerContext: ./mock_upstream
     healthCheckPath: /health
     envVars:
       - key: UPSTREAM_NAME
@@ -50,8 +50,8 @@ services:
     name: gateway
     runtime: docker
     plan: free
-    rootDir: gateway
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./gateway/Dockerfile
+    dockerContext: ./gateway
     healthCheckPath: /health
     envVars:
       - key: GATEWAY_UPSTREAM_A_HOST
@@ -85,8 +85,8 @@ services:
     name: dashboard
     runtime: docker
     plan: free
-    rootDir: dashboard
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./dashboard/Dockerfile
+    dockerContext: ./dashboard
     envVars:
       - key: NEXT_PUBLIC_GATEWAY_HOST
         fromService:
