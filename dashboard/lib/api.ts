@@ -80,6 +80,24 @@ export interface AiIncidentReport {
   applied_at: string | null;
 }
 
+export interface ChaosUpstreamStatus {
+  upstream: string;
+  mode: "normal" | "slow" | "error" | "rate_limited" | "flaky";
+  slow_latency_ms: number;
+  flaky_rate: number;
+  base_latency_ms: number;
+  degrade_active: boolean;
+}
+
+export type ChaosStatusResponse = Record<string, ChaosUpstreamStatus>;
+
+export type ChaosScenario =
+  | "outage"
+  | "intermittent"
+  | "rate_limit_storm"
+  | "degrade"
+  | "reset";
+
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${GATEWAY_URL}${path}`, { cache: "no-store" });
   if (!res.ok) {
@@ -118,5 +136,32 @@ export const triggerAnalysis = (upstream: string, windowMinutes: number) =>
 
 export const applyReport = (id: number) =>
   postJson<unknown>(`/ai/reports/${id}/apply`);
+
+export const fetchChaosStatus = () =>
+  getJson<ChaosStatusResponse>("/chaos/status");
+
+export const triggerChaos = (upstream: string, scenario: ChaosScenario) =>
+  postJson<unknown>(`/chaos/${upstream}/${scenario}`);
+
+// Fires `count` requests through the gateway's proxy path and returns
+// each response's status code. Doesn't throw on non-2xx -- 429/502/503
+// are expected, desired outcomes when demoing a chaos scenario, not
+// failures of this function.
+export async function sendTraffic(upstream: string, count: number): Promise<number[]> {
+  const results = await Promise.all(
+    Array.from({ length: count }, async () => {
+      try {
+        const res = await fetch(`${GATEWAY_URL}/proxy/${upstream}`, {
+          method: "POST",
+          cache: "no-store",
+        });
+        return res.status;
+      } catch {
+        return 0;
+      }
+    })
+  );
+  return results;
+}
 
 export const UPSTREAMS = ["upstream-a", "upstream-b", "upstream-c"];

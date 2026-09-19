@@ -5,6 +5,7 @@ import { StatsTable } from "@/components/StatsTable";
 import { RateLimitBars } from "@/components/RateLimitBars";
 import { EventsFeed } from "@/components/EventsFeed";
 import { IncidentsPanel } from "@/components/IncidentsPanel";
+import { ChaosControls } from "@/components/ChaosControls";
 import { usePolling } from "@/lib/usePolling";
 import {
   fetchCircuits,
@@ -12,20 +13,23 @@ import {
   fetchRateLimit,
   fetchRecentEvents,
   fetchAiReports,
+  fetchChaosStatus,
   UPSTREAMS,
   RateLimitStatus,
   AiIncidentReport,
+  ChaosStatusResponse,
 } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
 
 const CLIENT_ID = "anonymous";
 const STATS_WINDOW_SECONDS = 300;
 const REPORTS_POLL_MS = 3000;
+const CHAOS_POLL_MS = 2000;
 
 /**
- * Same shape as usePolling but exposes a manual refetch, so the
- * "analyze"/"apply" buttons in IncidentsPanel can refresh immediately
- * instead of waiting out the poll interval.
+ * Same shape as usePolling but exposes a manual refetch, so an action
+ * button (analyze/apply/chaos trigger) can refresh its section
+ * immediately instead of waiting out the poll interval.
  */
 function useReports(intervalMs: number) {
   const [data, setData] = useState<AiIncidentReport[] | null>(null);
@@ -34,6 +38,29 @@ function useReports(intervalMs: number) {
   const refetch = useCallback(async () => {
     try {
       const result = await fetchAiReports(20);
+      setData(result);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, []);
+
+  useEffect(() => {
+    refetch();
+    const id = setInterval(refetch, intervalMs);
+    return () => clearInterval(id);
+  }, [refetch, intervalMs]);
+
+  return { data, error, refetch };
+}
+
+function useChaosStatus(intervalMs: number) {
+  const [data, setData] = useState<ChaosStatusResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const refetch = useCallback(async () => {
+    try {
+      const result = await fetchChaosStatus();
       setData(result);
       setError(null);
     } catch (err) {
@@ -70,6 +97,7 @@ export default function DashboardPage() {
   }, []);
   const rateLimits = usePolling(fetchAllRateLimits, 2000);
   const reports = useReports(REPORTS_POLL_MS);
+  const chaosStatus = useChaosStatus(CHAOS_POLL_MS);
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-8 space-y-10">
@@ -93,6 +121,13 @@ export default function DashboardPage() {
           Circuit state
         </h2>
         <CircuitCards circuits={circuits.data} />
+      </section>
+
+      <section>
+        <h2 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wide">
+          Chaos controls
+        </h2>
+        <ChaosControls status={chaosStatus.data} onChanged={chaosStatus.refetch} />
       </section>
 
       <section>
