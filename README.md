@@ -9,13 +9,44 @@ This is a portfolio project built in phases. **The core gateway is built and
 benchmarked against a naive passthrough before any AI is introduced** — the
 AI layer has to prove it earns its place with numbers, not just exist.
 
-## Status
+## Screenshots
 
-- [x] Phase 1 — mock upstreams + core gateway (rate limiter, retry, circuit
-      breaker, failover router)
-- [x] Phase 2 — chaos injection + structured logging to Postgres + dashboard
-- [x] Phase 3 — smart-vs-naive benchmark report ([BENCHMARK_REPORT.md](BENCHMARK_REPORT.md))
-- [ ] Phase 4 — out-of-band AI failure analysis + re-benchmark
+<!--
+  Drop screenshots into docs/images/ and they'll render here automatically.
+  Suggested shots: the full dashboard, the chaos controls mid-demo (e.g.
+  upstream-a in "error" mode with a circuit OPEN), and an AI incident
+  report card with a circuit-breaker suggestion.
+-->
+
+![Dashboard overview](docs/images/dashboard-overview.png)
+![Chaos controls in action](docs/images/chaos-controls.png)
+![AI incident report](docs/images/ai-incident-report.png)
+
+## How to use the dashboard
+
+Open the dashboard (`http://localhost:3000` locally, or your deployed URL)
+and you'll see live gateway state polling every 2-3s, plus two interactive
+sections for driving a demo end to end without touching a terminal:
+
+1. **Chaos controls** — one card per upstream (`upstream-a/b/c`). Click a
+   scenario button to make that upstream misbehave:
+   - `outage` — every request fails (500)
+   - `flaky` — a random fraction of requests fail
+   - `rate limit` — every request returns 429
+   - `degrade` — latency ramps up over ~30s
+   - `reset` — back to healthy
+2. **Send traffic** — click "send traffic (10x)" under an upstream to fire
+   10 real requests through the gateway's `/proxy` path. Watch the Circuit
+   state and Recent requests sections update live as the breaker reacts.
+3. **AI incident analysis** — once you've generated some failure traffic,
+   click "analyze" under that upstream. This sends the last few minutes of
+   telemetry to a free LLM (Groq), which classifies the failure pattern
+   (outage / degradation / rate limiting / transient blip / healthy),
+   writes a plain-English summary, and optionally suggests a new circuit
+   breaker threshold — which you can accept with the "apply" button.
+
+A full demo loop: **outage → send traffic → analyze → reset**, all clicks,
+no curl required.
 
 ## Architecture (Phase 1)
 
