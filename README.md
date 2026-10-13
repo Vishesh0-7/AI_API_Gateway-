@@ -129,9 +129,7 @@ The gateway's request path for `POST /proxy/{primary}`:
   the router operate on the breaker objects directly and call
   `allow_request()` itself; a regression test now covers exactly this case
   (`test_regression_recovered_primary_is_chosen_again_via_half_open` in
-  `gateway/tests/test_router.py`). Worth mentioning in an interview as an
-  example of why "unit tests pass" and "the system behaves correctly under
-  real time-based state transitions" are different claims.
+  `gateway/tests/test_router.py`). 
 
 ## Architecture (Phase 2)
 
